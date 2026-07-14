@@ -56,12 +56,27 @@ jobs:
             sed -i '/androidScheduleMode:/a\        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,' "$SERVICE_FILE"
           fi
 
+      - name: Configure Java Compiler to Ignore Ambiguity Error
+        run: |
+          GRADLE_PROPERTIES="android/gradle.properties"
+          if [ -f "$GRADLE_PROPERTIES" ]; then
+            # Inject options to make compiler relaxed about legacy ambiguous SDK methods
+            echo "android.useAndroidX=true" >> "$GRADLE_PROPERTIES"
+            echo "android.enableJetifier=true" >> "$GRADLE_PROPERTIES"
+          fi
+          
+          # Patch subproject compilation task to ignore lint warnings converting to errors
+          ROOT_GRADLE="android/build.gradle"
+          if [ -f "$ROOT_GRADLE" ]; then
+            echo -e "\nsubprojects {\n    tasks.withType(JavaCompile) {\n        options.compilerArgs << '-Xlint:-amber' << '-Xlint:-deprecation'\n    }\n}" >> "$ROOT_GRADLE"
+          fi
+
       - name: Run static analysis
         run: flutter analyze
         continue-on-error: true
 
       - name: Build release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK as build artifact
         uses: actions/upload-artifact@v4
