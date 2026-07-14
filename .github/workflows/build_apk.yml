@@ -26,7 +26,7 @@ jobs:
       - name: Force Upgrade Pinned Dependencies
         run: |
           flutter pub add intl:^0.20.2
-          flutter pub add flutter_local_notifications:^17.0.0
+          flutter pub add flutter_local_notifications:16.1.0
 
       - name: Generate native Android project files (if missing)
         run: |
@@ -54,15 +54,6 @@ jobs:
           SERVICE_FILE="lib/core/services/birthday_notification_service.dart"
           if [ -f "$SERVICE_FILE" ]; then
             sed -i '/androidScheduleMode:/a\        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,' "$SERVICE_FILE"
-          fi
-
-      - name: Enable core library desugaring
-        run: |
-          GRADLE_FILE="android/app/build.gradle"
-          if [ -f "$GRADLE_FILE" ]; then
-            # Append configuration explicitly to avoid string matching issues
-            echo -e "\nandroid {\n    compileOptions {\n        coreLibraryDesugaringEnabled true\n    }\n}" >> "$GRADLE_FILE"
-            echo -e "\ndependencies {\n    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'\n}" >> "$GRADLE_FILE"
           fi
 
       - name: Run static analysis
