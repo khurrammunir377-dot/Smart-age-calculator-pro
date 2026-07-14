@@ -42,6 +42,13 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Fix local notification compilation error
+        run: |
+          SERVICE_FILE="lib/core/services/birthday_notification_service.dart"
+          if [ -f "$SERVICE_FILE" ]; then
+            sed -i '/androidScheduleMode:/a\        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,' "$SERVICE_FILE"
+          fi
+
       - name: Run static analysis
         run: flutter analyze
         continue-on-error: true
