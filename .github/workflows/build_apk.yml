@@ -24,13 +24,20 @@ jobs:
           channel: 'stable'
 
       - name: Force Upgrade Pinned Dependencies
-        run: flutter pub add intl:^0.20.2
+        run: |
+          flutter pub add intl:^0.20.2
+          flutter pub add flutter_local_notifications:^17.0.0
 
       - name: Generate native Android project files (if missing)
         run: |
           if [ ! -d "android" ]; then
             flutter create . --platforms=android
           fi
+
+      - name: Ensure assets directories exist
+        run: |
+          mkdir -p assets/images
+          mkdir -p assets/fonts
 
       - name: Add notification permission to AndroidManifest.xml
         run: |
