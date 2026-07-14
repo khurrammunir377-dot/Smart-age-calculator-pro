@@ -56,19 +56,12 @@ jobs:
             sed -i '/androidScheduleMode:/a\        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,' "$SERVICE_FILE"
           fi
 
-      - name: Configure Java Compiler to Ignore Ambiguity Error
+      - name: Patch Flutter Local Notifications Java Source
         run: |
-          GRADLE_PROPERTIES="android/gradle.properties"
-          if [ -f "$GRADLE_PROPERTIES" ]; then
-            # Inject options to make compiler relaxed about legacy ambiguous SDK methods
-            echo "android.useAndroidX=true" >> "$GRADLE_PROPERTIES"
-            echo "android.enableJetifier=true" >> "$GRADLE_PROPERTIES"
-          fi
-          
-          # Patch subproject compilation task to ignore lint warnings converting to errors
-          ROOT_GRADLE="android/build.gradle"
-          if [ -f "$ROOT_GRADLE" ]; then
-            echo -e "\nsubprojects {\n    tasks.withType(JavaCompile) {\n        options.compilerArgs << '-Xlint:-amber' << '-Xlint:-deprecation'\n    }\n}" >> "$ROOT_GRADLE"
+          TARGET_FILE="$HOME/.pub-cache/hosted/pub.dev/flutter_local_notifications-16.3.2/android/src/main/java/com/dexterous/flutterlocalnotifications/FlutterLocalNotificationsPlugin.java"
+          if [ -f "$TARGET_FILE" ]; then
+            echo "Patching ambiguous Java call inside package cache..."
+            sed -i 's/bigPictureStyle.bigLargeIcon(null);/bigPictureStyle.bigLargeIcon((Bitmap)null);/g' "$TARGET_FILE"
           fi
 
       - name: Run static analysis
