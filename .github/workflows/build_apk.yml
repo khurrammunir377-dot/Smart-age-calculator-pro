@@ -60,10 +60,9 @@ jobs:
         run: |
           GRADLE_FILE="android/app/build.gradle"
           if [ -f "$GRADLE_FILE" ]; then
-            # Enable core library desugaring flag inside compileOptions
-            sed -i '/compileOptions {/a\        coreLibraryDesugaringEnabled true' "$GRADLE_FILE"
-            # Add the desugaring dependency inside dependencies block
-            sed -i '/dependencies {/a\    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.4"' "$GRADLE_FILE"
+            # Append configuration explicitly to avoid string matching issues
+            echo -e "\nandroid {\n    compileOptions {\n        coreLibraryDesugaringEnabled true\n    }\n}" >> "$GRADLE_FILE"
+            echo -e "\ndependencies {\n    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'\n}" >> "$GRADLE_FILE"
           fi
 
       - name: Run static analysis
