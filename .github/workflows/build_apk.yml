@@ -26,7 +26,7 @@ jobs:
       - name: Force Upgrade Pinned Dependencies
         run: |
           flutter pub add intl:^0.20.2
-          flutter pub add flutter_local_notifications:16.1.0
+          flutter pub add flutter_local_notifications:16.3.2
 
       - name: Generate native Android project files (if missing)
         run: |
