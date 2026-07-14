@@ -42,7 +42,7 @@ jobs:
       - name: Add notification permission to AndroidManifest.xml
         run: |
           MANIFEST="android/app/src/main/AndroidManifest.xml"
-          if ! grep -q "POST_NOTIFICATIONS" "$MANIFEST"; then
+          if [ -f "$MANIFEST" ] && ! grep -q "POST_NOTIFICATIONS" "$MANIFEST"; then
             sed -i '/<manifest /a\    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>' "$MANIFEST"
           fi
 
@@ -54,6 +54,16 @@ jobs:
           SERVICE_FILE="lib/core/services/birthday_notification_service.dart"
           if [ -f "$SERVICE_FILE" ]; then
             sed -i '/androidScheduleMode:/a\        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,' "$SERVICE_FILE"
+          fi
+
+      - name: Enable core library desugaring
+        run: |
+          GRADLE_FILE="android/app/build.gradle"
+          if [ -f "$GRADLE_FILE" ]; then
+            # Enable core library desugaring flag inside compileOptions
+            sed -i '/compileOptions {/a\        coreLibraryDesugaringEnabled true' "$GRADLE_FILE"
+            # Add the desugaring dependency inside dependencies block
+            sed -i '/dependencies {/a\    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.4"' "$GRADLE_FILE"
           fi
 
       - name: Run static analysis
